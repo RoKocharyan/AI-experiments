@@ -1,0 +1,27 @@
+{
+  "model": "llama3.2",
+  "raw": true,
+  "keep_alive": 1800,
+  "options": {
+    "num_predict": 2048,
+    "num_ctx": 8096
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "```c:\\Users\\Roman\\Desktop\\llm test\\functions\\add.py\n
+      def add():
+        try:
+            num1 = float(input(\"Enter the first number: \"))
+            num2 = float(input(\"Enter the second number: \"))
+            result = num1 + num2
+            print(f\"The result of addition is: {result}\")
+        except ValueError:
+            print(\"Invalid input. Please enter numbers only.\")
+    if __name__ == \"__main__\":
+    add()
+            ```
+        add.py "
+    }
+  ]
+}
