@@ -1,0 +1,21 @@
+{
+  "microservice": {
+    "name": "account",
+    "customization": [
+      {
+        "modelFieldName": "onboardnigLink",
+        "type": "string",
+        "uiElement": "infocard",
+        "freandlyname": "Onboarding link",
+        "content": "url"
+      },
+      {
+        "modelFieldName": "image",
+        "type": "image",
+        "uiElement": "infocard",
+        "freandlyname": "profile photo",
+        "content": "img"
+      }
+    ]
+  }
+}

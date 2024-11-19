@@ -1,0 +1,13 @@
+customization:
+  category: account
+  model:
+    - modelField: onboardingLink
+      type: string
+      uiElement: infocard
+      friendlyName: Onboarding link
+      content: url
+    - modelField: status
+      type: string
+      uiElement: infocard
+      friendlyName: Status
+      content: url
