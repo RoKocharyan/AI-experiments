@@ -1,7 +1,9 @@
 import requests
 import json
 #from milvus.checkSimilarity import process_question 
-from extractCode import extractCode, overwrite_file
+from file_operations.file_operations import *
+from ollama.ollama_api import ollama_generate
+from Yaml_parser.yamlParser import *
 # Define the base URL for the Ollama instance
 OLLAMA_BASE_URL = "http://192.168.10.109:11434/api/"  # Adjust port if necessary
 MODEL_NAME = "llama3.2"
@@ -45,6 +47,7 @@ def chat():
     except requests.exceptions.RequestException as e:
         return e
     return 
+
 def askQuestion(question):
     prompt = question
     headers = {"Content-Type": "application/json"}
@@ -65,30 +68,12 @@ def askQuestion(question):
     else:
         raise Exception(f"Error {response.status_code}: {response.text}")
     
-
 def summarizeConversation():
     prompt = (
-        f"this is user conversation'{MESSAGES}'\n"
+        f"this is user conversation \n'{MESSAGES}'\n"
         "Please respond with a short user request description."
     )
-    headers = {"Content-Type": "application/json"}
-    data = {
-        "model": MODEL_NAME,
-        "prompt": prompt,
-        "stream": False
-    }
-    response = requests.post(f"{OLLAMA_BASE_URL}generate/", headers=headers, json=data)
-    
-    # Check for successful response
-    if response.status_code == 200:
-        result = response.json()
-        # Extract the generated question from Llama's response
-        clarification_question = result.get("response")
-        print(clarification_question)
-        return clarification_question
-    else:
-        raise Exception(f"Error {response.status_code}: {response.text}")
-    return
+    summarized_prompt = generate(prompt, "llama3.2")
 
 def ask_llama_for_clarification(user_request):
     # Prepare the prompt to guide Llama in generating a follow-up question
@@ -121,3 +106,4 @@ if __name__ == "__main__":
         # print()
 
 
+    

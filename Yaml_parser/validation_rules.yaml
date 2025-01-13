@@ -1,0 +1,18 @@
+valid_categories:
+  - AccountMS
+valid_types:
+  - string
+valid_contents:
+  - url
+  - text
+valid_ui_elements:
+  - infocard
+required_microservice_keys:
+  - category
+  - model
+required_model_keys:
+  - modelField
+  - type
+  - uiElement
+  - friendlyName
+  - content

@@ -3,7 +3,8 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from milvus.checkSimilarity import checkSimilarity 
-from fileOperations import *
+from file_operations import *
+from ollama.ollama_api import *
 import json
 import httpx
 import asyncio
@@ -60,6 +61,7 @@ async def stream_ollama_response(messages):
                         try:
                             data = json.loads(line)
                             content = data.get("message", "").get("content" , "")
+                            # print(content + "")
                             response_message += content
                         except json.JSONDecodeError:
                             # Handle cases where the line is not valid JSON
@@ -91,53 +93,10 @@ def summarizeConversation():
         f"this is user conversation'{MESSAGES}'\n"
         "Please respond with a short user request description."
     )
-    return generate(prompt)
-
-def modifyModel(request):
-    modelName = "model.jsx"
-    componentName = "ClassView.jsx"
-    
-    message = "extract field name and type from conversation with user and add it to model in this code. do not modify existing fields. you must return with full provided code and added field. stick to convention used in provided code."
-    oldModel = read_file_content(modelName)
-    prompt = "this is user prompt " + request + message + oldModel
-    answer = generate(prompt)
-    code = extractCode(answer)
-    overwrite_file(code, modelName)
-    # newModel = read_file_content(modelName)
-
-    # message = "add new infocard to this code @code "
-    # classView = read_file_content(componentName)
-    # print(classView)
-    # diff = find_differences(oldModel, newModel)
-    # print(diff)
-    # message.replace("@model", diff)
-    
-    # answer = generate(message + classView)
-    # code = extractCode(answer)
-    # overwrite_file(code, componentName)
-    return
+    return ollama_generate(prompt, "llama3.2")
 
 
-def generate(prompt):
-    headers = {"Content-Type": "application/json"}
-    data = {
-        "model": MODEL_NAME,
-        "prompt": prompt,
-        "stream": False
-    }
-    response = requests.post(f"{OLLAMA_BASE_URL}generate/", headers=headers, json=data)
-    
-    # Check for successful response
-    if response.status_code == 200:
-        result = response.json()
-        # Extract the generated question from Llama's response
-        answer = result.get("response")
-        # print(clarification_question)
-        return answer
-    else:
-        raise Exception(f"Error {response.status_code}: {response.text}")
 
-    return
 ITERATIONS = 0
 # to run 
 # uvicorn AiAssistant:app --host 0.0.0.0 --port 8000
@@ -148,21 +107,16 @@ async def chat(request: ChatRequest):
     async with LOCK:
         # Add the user's message
         add_message("user", request.message)
-        if ITERATIONS  < 3 :
-            ask_llama_for_clarification(request)
-        else:
+        if ITERATIONS  > 1 :
             summ = summarizeConversation()
-            # closest, percent = checkSimilarity(summ)
             print(summ)
-            modifyModel(summ)
+            result = checkSimilarity(summ)
             
-            # print(closest)
-            # print(percent)
-            # if percent < 70:
-                # ITERATIONS = 1
             
         ITERATIONS = ITERATIONS + 1 
     # Stream the response from the Ollama API
+    # print(MESSAGES)
+
     return StreamingResponse(stream_ollama_response(MESSAGES), media_type="text/event-stream")
 #v2
 # @app.post("/chat")
@@ -181,13 +135,10 @@ async def chat(request: ChatRequest):
 
 # if __name__ == "__main__":
 #     print("type 'exit' to quit")
-#     iteration = 0
 #     while True:
 #         request = input(">>>")
 #         if request == "exit":
 #             print("Exiting...")
 #             break
-#         str1 = "{\n  accountId: { type: Number },\n  url: { type: String },\n  numberOfAssistants: { type: Number } // Added this field\n});\n\nexport default model('Accounts', accountSchema);\n',)"
-#         str2 = "{\n  accountId: { type: Number },\n  url: { type: String }\n});\n\nexport default model('Accounts', accountSchema);\n',)"
-#         print(find_differences(str1, str2))
-#         #modifyModel(request)
+#         add_message("user", request)
+#         stream_ollama_response(MESSAGES)

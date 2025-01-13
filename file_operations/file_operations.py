@@ -1,23 +1,24 @@
 import re
-import difflib
+from typing import List, Dict, Any, Tuple
+import yaml
 
-def extractCode(payload):
-    match = re.search(r"```(?:javascript)?\s*(.*?)```", payload, re.DOTALL)
-    #if match:
-        #print (match.groups())
-    return match.group(1)
 
-def overwrite_file(text, filename):
+def extractCode(payload, language=None):
+    # Remove curly braces around the language
+    language_pattern = rf"{language}" if language else ""
+    # Construct the regex pattern without curly braces
+    pattern = rf"```{language_pattern}\s*(.*?)```"
+    
+    match = re.search(pattern, payload, re.DOTALL)
+    if match:
+        return match.group(1).strip()  # Optional: Remove leading/trailing whitespace
+    return None
+
+def overwrite_file(content, filename):
     with open(filename, 'w') as file:
-        file.write(text)
+        file.write(content)
 
 def read_file_content(file_path):
-    """
-    Reads the content of a file and returns it as a string.
-
-    :param file_path: Path to the file to be read.
-    :return: Content of the file as a string.
-    """
     try:
         with open(file_path, 'r') as file:
             content = file.read()
@@ -28,13 +29,7 @@ def read_file_content(file_path):
         return f"An error occurred: {e}"
     
 def find_differences(model1, model2):
-    """
-    Compares two models (as strings) and identifies the different field.
 
-    :param model1: First model as a string.
-    :param model2: Second model as a string.
-    :return: The field that differs as a string.
-    """
     model1_lines = set(model1.splitlines())
     model2_lines = set(model2.splitlines())
     
@@ -46,3 +41,6 @@ def find_differences(model1, model2):
     differences = diff1.union(diff2)
     return "\n".join(differences)
 
+def load_yaml(yaml_file_path: str) -> Dict[str, Any]:
+    with open(yaml_file_path, 'r') as yaml_file:
+        return yaml.safe_load(yaml_file)

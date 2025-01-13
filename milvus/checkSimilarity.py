@@ -26,7 +26,7 @@ def get_embedding(question):
     return embedding.tolist()
 
 # Function to find the closest match in Milvus using cosine similarity
-def find_closest_question(embedding, top_k=1):
+def find_closest_entries(embedding, limit=1):
     collection = Collection(db_collection)
     collection.load()
     search_params = {"metric_type": "COSINE", "params": {"nprobe": 10}}
@@ -36,23 +36,25 @@ def find_closest_question(embedding, top_k=1):
         data=[embedding],
         anns_field="embedding",
         param=search_params,
-        limit=top_k,
+        limit=limit,
         output_fields=["sample_prompt"]
     )
     
     # Check if we have results
     if results and results[0]:
-        # Retrieve the closest match's question text and similarity score
-        closest_match = results[0][0].entity.get("sample_prompt")
-        similarity_score = results[0][0].distance
-        similarity_percentage = similarity_score * 100  # Convert cosine similarity to percentage
+        # Retrieve the top `top_k` matches' question text and similarity scores
+        matches = []
+        for hit in results[0]:  # Iterate over the top_k results
+            sample_prompt = hit.entity.get("sample_prompt")
+            template_id = hit.entity.get("template_id")
+            similarity_score = hit.distance
+            similarity_percentage = similarity_score * 100  # Convert cosine similarity to percentage
+            matches.append({"sample_prompt": sample_prompt, "similarity": similarity_percentage, "template_id": template_id})
         
-        # Print or handle the similarity and context text
-        # if similarity_percentage > 10:
-        #     return "Please give me more details"
-        # else:
-        return closest_match, similarity_percentage
-    return None, None
+        return matches  # Return a list of results
+    
+    return []  # Return an empty list if no results
+
 
 # Process a user question, compare with existing questions in Milvus, and get a Mistral response
 def checkSimilarity(question):
@@ -61,9 +63,13 @@ def checkSimilarity(question):
     embedding = get_embedding(question)
 
     # Step 2: Find the closest question in the database based on cosine similarity
-    closest_match, similarity_percentage = find_closest_question(embedding)
+    results = find_closest_entries(embedding, 5)
     
-    if closest_match and similarity_percentage is not None:
-        return closest_match, similarity_percentage
+    for idx, result in enumerate(results):
+        print(f"Rank {idx+1}:")
+        print(f"Question: {result['sample_prompt']}")
+        print(f"Similarity: {result['similarity']:.2f}%")
+    if results  is not None:
+        return results
     else:
         return "Not found" 

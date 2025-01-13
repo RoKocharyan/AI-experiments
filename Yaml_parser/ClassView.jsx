@@ -4,8 +4,8 @@ import GetUsersButton from "./ChangeManager";
 import InfoCard from "./InfoCard";
 import UserOfClassTable from "./UserOfClassTable";
 import { urlPrefix } from "../../../../../../Settings";
-import TableView  from "./tableView";
-import ChatAssistant from "../../../../ChatAssistant"
+import TableView from "./tableView";
+import ChatAssistant from "../../../../ChatAssistant";
 import {
   FaEye,
   FaEyeSlash,
@@ -59,7 +59,6 @@ const ClassView = () => {
 
       const data = await response.json();
       setCustomization(data.account);
-      
     } catch (error) {
       console.error("Error fetching customization data:", error);
     } finally {
@@ -103,33 +102,33 @@ const ClassView = () => {
   };
 
   const roleMap = {
-    1: 'SysAdmin',
-    2: 'Admin',
-    4: 'AccountManager',
-    8: 'Beneficiary',
+    1: "SysAdmin",
+    2: "Admin",
+    4: "AccountManager",
+    8: "Beneficiary",
   };
-  
+
   const userColumns = [
     {
-      label: 'Image',
-      key: 'userImage',
+      label: "Image",
+      key: "userImage",
       render: (row) => (
         <img
-          src={row.userImage || 'default-photo-url'}
+          src={row.userImage || "default-photo-url"}
           alt={`${row.firstName} ${row.lastName}`}
           className="w-10 h-10 rounded-full"
         />
       ),
     },
     {
-      label: 'Name',
-      key: 'name',
+      label: "Name",
+      key: "name",
       render: (row) => `${row.firstName} ${row.lastName}`,
     },
     {
-      label: 'Role',
-      key: 'accountRoleId',
-      render: (row) => roleMap[row.accountRoleId] || 'Unknown',
+      label: "Role",
+      key: "accountRoleId",
+      render: (row) => roleMap[row.accountRoleId] || "Unknown",
     },
     // { label: 'Email', key: 'email' },
     // {
@@ -191,14 +190,14 @@ const ClassView = () => {
           >
             <GetUsersButton userList={users} />
           </InfoCard>
-          <InfoCard headline="Onboarding Link" link={customization?.url} />
-          
+          {/*generate Info Card*/}
+
         </div>
       </div>
 
       {/* <UserOfClassTable users={users} /> */}
-      <TableView data={users} columns={userColumns}/>
-      <ChatAssistant/>
+      <TableView data={users} columns={userColumns} />
+      <ChatAssistant />
     </main>
   );
 };
